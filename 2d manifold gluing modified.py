@@ -1,4 +1,4 @@
-def generate_polygon_vertices():
+def generate_polygon_verteces():
     gluing=input("please input gluing here:")
     edges=gluing.split(',')
     check_edges=[]
@@ -13,7 +13,7 @@ def generate_polygon_vertices():
             edge=edge+'2' #if we already have the identity in check edges, we don't need to collect the identity again, but we want to
             #marke the edge as the second one of its identity (this is just to make later code possible)
         else:
-            check_edges.append(edge) #if the edge has a new identity, we want to record it in check_edges for later consideration
+            check_edges.append(edge_placeholder) #if the edge has a new identity, we want to record it in check_edges for later consideration
         edges[a]=edge
         a=a+1
     relationships={} #this dictionary is going to be a relationship of arbitrary points on each edge. there are going to be two points
@@ -102,13 +102,14 @@ def generate_polygon_vertices():
 
     return relationships,check_edges,edges #relationships,check_edges,edges are the three values we need to know
 
-relationships,check_edges,edges=generate_polygon_vertices()
+relationships,check_edges,edges=generate_polygon_verteces()
 
 def determine_boundary_edges(check_edges,edges) :
     boundaries=[] #this list is going to hold all of the edge identities that represent boundary edges
 
     for item in check_edges: #pick an item in our list of edge identities (check_edges)
-
+        if item[0] == '-':
+            item=item[1:]
         if '-'+item+'2' not in edges and item+'2' not in edges: #for a side A, there are two possible notations for the second edge based
             #on how we modified it earlier, -A2 or A2. so we check if either of these appear in the edge list.
 
@@ -119,15 +120,15 @@ def determine_boundary_edges(check_edges,edges) :
 
 boundaries=determine_boundary_edges(check_edges,edges)
 
-def determine_vertices(relationships,check_edges,boundaries):
+def determine_verteces(relationships,boundaries):
     # for this function, we have two arbitrary points for each line, a 'lower' connection and 'upper' connection which represent the
-    #vertices of the polygon. we also have all of these points found as keys in our relationships dictionary, so we can quickly grab
+    #verteces of the polygon. we also have all of these points found as keys in our relationships dictionary, so we can quickly grab
     #them all by just using the .keys() function already present in python to grab the keys, and convert them to a list for ease
     #of use later
     edges_split=list(relationships.keys()) 
-    vertices=[] #this list is going to be built on later, by adding the connection 'points' that we defined early that relate to the
+    verteces=[] #this list is going to be built on later, by adding the connection 'points' that we defined early that relate to the
     #same vertex in the glued polygon as their own sublists. thus the number of vertexes will just be a list, and you can also modify
-    #the code to see what edges connect to what vertices, possibly enabling the use of this code in building a visualizer for the actual
+    #the code to see what edges connect to what verteces, possibly enabling the use of this code in building a visualizer for the actual
     #2D manifold
     boundaries2=[]# this list is going to hold all of the boundary edge connection 'points', which are defined in the next loop
     a=0
@@ -138,12 +139,12 @@ def determine_vertices(relationships,check_edges,boundaries):
         boundaries2.append(lower) #append the lower connection string
         a=a+1
     #at this point, the boundaries 2 list is of the same format as the edges_split, but only containing those related to the boundaries.
-    #for ease of coding, we first start at boundary conditions for circle tracing around polygon vertices, as these area segments that
+    #for ease of coding, we first start at boundary conditions for circle tracing around polygon verteces, as these area segments that
     #start at boundaries have to end at other boundaries, and you can't return to a point you already passed through (because the boundary
     #edges don't glue to other edges, a point on that edge only has one way to approach it from inside the polygon, you can't attack the
     #other side by passing through the edges glued opposite)
     #if we don't start at boundary conditions, then you may accidently define a vertex only partially, leading to doubling of the vertex
-    #in the vertices list, or worse
+    #in the verteces list, or worse
     b=0#arbitrarily, we are going to grab the first boundary edge connection in the boundaries2 list and start form there
     while b < len(boundaries2) : #as long as there are unused points in the boundaries2 list, the following code will be repeated
         startpoint=boundaries2[b]#this is where we will start our ray tracing for this vertex
@@ -182,15 +183,16 @@ def determine_vertices(relationships,check_edges,boundaries):
                 if Next2 not in edges_split: #so Next2 represents the potential clockwise opposite gluing, if that doesn't exist, the
                     #glued edge is the counterclockwise orientation, so we save that.
                     Next2='-'+Next2
+                edges_split.remove(Next1)
             list_holder.append(Next1)
             #we add Next1 to our list_holder, a temporary list organizer for collecting points related to one vertex
             #then we repeate the loop if we reached this point
-        vertices.append(list_holder) #once a loop has ended, we append all the points we have saved as a single item to the vertices list,
+        verteces.append(list_holder) #once a loop has ended, we append all the points we have saved as a single item to the Verteces list,
         #and then return to line 148.
-    
+
     #at this point, no more boundary conditions remain as possible options to use in the edges list, so we can now start picking arbitrary
     #points and begin circle tracing until we return to our starting point, with no fear of running into a boundary condition, there are no
-    #more present. the following code is extremely similar to the previous loop structure for dealing with the vertices attached to boundary
+    #more present. the following code is extremely similar to the previous loop structure for dealing with the verteces attached to boundary
     #edges
     b=0
     while b < len(edges_split):
@@ -224,11 +226,11 @@ def determine_vertices(relationships,check_edges,boundaries):
             if Next2 == startpoint:
                 complete=True
             
-        vertices.append(list_holder)
+        verteces.append(list_holder)
 
-    return vertices,edges_split
+    return verteces,edges_split
 
-vertices,edges_split=determine_vertices(relationships,check_edges,boundaries)
+verteces,edges_split=determine_verteces(relationships,boundaries)
 
 def determine_number_of_edges(edges,boundaries):
     number_of_edges=((len(edges)-len(boundaries))/2)+len(boundaries) #this line calculates the number of codes, all edges that aren't boudnaries
@@ -239,13 +241,13 @@ def determine_number_of_edges(edges,boundaries):
 
 number_of_edges=determine_number_of_edges(edges,boundaries)
 
-def euler_characteristic(vertices,number_of_edges) :
-    Euler=len(vertices)-number_of_edges+1#the Euler characteristic is the number of vertices, minus the number of edges, plus the number of faces
-    #we already calculated the number of edges, and because we have a single polygon, we have one face. thus, we also use the len of the vertices
-    #list we calculated earlier to get the number of vertices. Thus, the Euler characteristic is determined
+def euler_characteristic(verteces,number_of_edges) :
+    Euler=len(verteces)-number_of_edges+1#the Euler characteristic is the number of verteces, minus the number of edges, plus the number of faces
+    #we already calculated the number of edges, and because we have a single polygon, we have one face. thus, we also use the len of the verteces
+    #list we calculated earlier to get the number of verteces. Thus, the Euler characteristic is determined
     return Euler #we return this for use in calculating the genus of the surface
 
-Euler=euler_characteristic(vertices,number_of_edges)
+Euler=euler_characteristic(verteces,number_of_edges)
 
 def determine_orientability(edges,check_edges,boundaries):
     orientable=True # we assume orientability is true, until we find a condition which makes the surface not orientable
@@ -258,26 +260,56 @@ def determine_orientability(edges,check_edges,boundaries):
                     check2=check1+'2'
                     if check2 in edges:#if the second occurence of the edge identity also has a clockwise orientation, then the orientability is false
                         orientable = False #set orientable to false
+                        e=e+len(check_edges)
                 else: #the first occurence of the edge identity has a counterclockwise orientation
                     check2='-'+check1+'2'
                     if check2 in edges:# if the second occurence of the edge identity also has a counterclockwise orientation, then the orientability is false
                         orientable = False #set orientable to false
+                        e=e+len(check_edges)
             e=e+1 #move on to check the next edge
     return orientable #return orientability to display, and also use in calculating genus
 
 orientable=determine_orientability(edges,check_edges,boundaries)
 
-def determine_genus(Euler,orientable,boundaries):
+def determine_compacted_boundaries(edges, boundaries):
+    compacted_boundaries=len(boundaries)
+    for item in boundaries:
+        print('compacted_boundaries')
+        print(compacted_boundaries)
+        index=edges.index(item)
+        print(index)
+        if index == 0:
+            if edges[-1] in boundaries:
+                compacted_boundaries=compacted_boundaries-.5
+            if edges[1] in boundaries:
+                compacted_boundaries=compacted_boundaries-.5
+        elif index == len(edges)-1:
+            if edges[0] in boundaries:
+                compacted_boundaries=compacted_boundaries-.5
+            if edges[-2] in boundaries:
+                compacted_boundaries=compacted_boundaries-.5
+        else:
+            if edges[index-1] in boundaries:
+                compacted_boundaries = compacted_boundaries-.5
+            if edges[index+1] in boundaries:
+                compacted_boundaries = compacted_boundaries-.5
+    if len(boundaries) != 0 and compacted_boundaries == 0:
+        compacted_boundaries = 1
+    return compacted_boundaries
+
+compacted_boundaries = determine_compacted_boundaries(edges,boundaries)
+
+def determine_genus(Euler,orientable,compacted_boundaries):
     if orientable == True:
-        genus=0-((Euler+len(boundaries)-2)/2) # if the surface is orientable, this equation allows you to calculate the genus
+        genus=0-((Euler+compacted_boundaries-2)/2) # if the surface is orientable, this equation allows you to calculate the genus
     else:
-        genus=0-(Euler+len(boundaries)-2) #if the surface is not orientable, this equation allows you to calculate the genus
+        genus=0-(Euler+compacted_boundaries-2) #if the surface is not orientable, this equation allows you to calculate the genus
     return(genus)
 
-genus=determine_genus(Euler,orientable,boundaries)
+genus=determine_genus(Euler,orientable,compacted_boundaries)
 
 print('the Euler characteristic is ' +str(Euler))
-print('there are ' +str(len(boundaries)) +' boundaries')
+print('there are ' +str(compacted_boundaries) +' boundaries')
 if orientable == False:
     print('the surface is not orientable')
 else:
