@@ -3,8 +3,7 @@ Coding projects for Topology
 
 ## 2D-Manifold Gluing
 
-This program, with an input polygon schema, can calculate the three qualities that form a complete invariant of 2-dimensional manifolds:  
-the Euler characteristic, the orientability and, the genus of the resulting surface. The homogeneity class (the homogenous space formed)
+This program, with an input polygon schema, can calculate the three qualities that form a complete invariant of 2-dimensional manifolds: the Euler characteristic, the orientability and, the genus of the resulting surface. The homogeneity class (the homogenous space formed)
 of the presented polygon schema is calcualted with the three qualities above.
 
 ## Baracket/Jones Polynomial
