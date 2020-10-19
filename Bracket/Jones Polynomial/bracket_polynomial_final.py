@@ -1,7 +1,7 @@
 import copy
 
 def collect_parametrized_knot():
-    information=open("knot parametrization input.txt","r")
+    information=open("knot_parametrization_input.txt","r")
     information=information.readlines()
     information=information[8:]
     information=str(information)
