@@ -872,12 +872,9 @@ def complete_polynomial_bracket ():
     return bracket
 
 jones_polynomial=complete_polynomial_bracket()
-print("\033[1;37;48m \n")
-print()
-print()
+print("\033[1;37;48m \n \n \n")
 print('jones polynomial is', jones_polynomial)
-print()
-print()
+print('\n' + '\n)
 
 #knot_test=list([[[1,1],[2,0],[3,-1]],[[2,1],[3,0],[1,-1]],[[3,1],[1,0],[2,-1]]])
 #jonespolynomial=complete_polynomial_bracket(knot_test)
