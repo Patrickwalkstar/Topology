@@ -1,8 +1,13 @@
 import copy
 
-def collect_parametrized_knot():
-    information=open("knot_parametrization_input.txt","r")
-    information=information.readlines()
+def collect_parametrized_knot(knot_information):
+    if knot_information:
+        information = knot_information
+    else:
+        with open('Bracket-Jones_Polynomial\knot_parametrization_input.txt', 'r') as inputFile:
+            information=inputFile.readlines()
+        inputFile.close()
+    
     information=information[8:]
     information=str(information)
     information=information[2:(len(information)-2)]
@@ -12,22 +17,19 @@ def collect_parametrized_knot():
         if i==0:
             strand_considered=strand_considered[0:len(strand_considered)-4]
         elif i==(len(information)-1):
-            strand_considered=strand_considered[1:len(strand_considered)]
+            strand_considered = strand_considered[1:]
         else:
             strand_considered=strand_considered[1:len(strand_considered)-4]
         information[i]=strand_considered
-    parametrization=list()
+    parametrization=[]
     for i in range(len(information)):
         strand_considered=information[i]
         List=strand_considered.split(',')
         for i in range(len(List)):
             item_considered=List[i]
-            if i%2==0:
-                item_considered=item_considered[1:]
-            else:
-                item_considered=item_considered[0:(len(item_considered)-1)]
+            item_considered = item_considered[1:] if i%2==0 else item_considered[:-1]
             List[i]=item_considered
-        new_List=list()
+        new_List=[]
         for i in range(0,len(List),2):
             List[i+1]=int(float(List[i+1]))
             new_item=list([List[i],List[i+1]])
@@ -37,85 +39,66 @@ def collect_parametrized_knot():
     return (parametrization)
 
 def check_intersections(knot_unperturbed):
-    intersections=list()
-    a=0
-    while a < len(knot_unperturbed):
-        strand_considered=knot_unperturbed[a]
-        b=0
-        while b < len(strand_considered):
-            intersection_considered=strand_considered[b]
+    intersections = []
+    for a in range(len(knot_unperturbed)):
+        strand_considered = knot_unperturbed[a]
+        for b in range(len(strand_considered)):
+            intersection_considered = strand_considered[b]
             if intersection_considered[0] not in intersections:
                 intersections.append(intersection_considered[0])
-            b=b+1
-        a=a+1
     return intersections
 
-def reverse_strands(knot_unperturbed,initial_strand,intersection):
-    knot2=copy.copy(knot_unperturbed)
-    strands_to_flip=list()
-    strands_to_flip.append(initial_strand)
-    intersection_check=initial_strand[-1]
-    a=0
+def reverse_strands(knot_unperturbed, initial_strand, intersection):
+    knot2 = copy.copy(knot_unperturbed)
+    strands_to_flip = [initial_strand]
+    intersection_check = initial_strand[-1]
+    a = 0
     while a < len(knot2) and intersection_check[0] != intersection:
-        strand_considered=knot2[a]
-        intersection_considered=strand_considered[0]
-        if intersection_considered[0]==intersection_check[0] and intersection_considered[1]==-(intersection_check[1]):
+        strand_considered = knot2[a]
+        intersection_considered = strand_considered[0]
+        if intersection_considered[0] == intersection_check[0] and intersection_considered[1] == -intersection_check[1]:
             strands_to_flip.append(strand_considered)
-            intersection_check=strand_considered[-1]
-            a=0
+            intersection_check = strand_considered[-1]
+            a = 0
         else:
-            a=a+1
-    strands_flipped=list()
-    a=0
+            a = a + 1
+    strands_flipped = []
+    a = 0
     while a < len(strands_to_flip):
-        strand_considered=strands_to_flip[a]
+        strand_considered = strands_to_flip[a]
         knot2.remove(strand_considered)
-        b=1
-        strand_flipped=list()
-        while b<(len(strand_considered)+1):
+        b = 1
+        strand_flipped = []
+        while b < len(strand_considered) + 1:
             strand_flipped.append(strand_considered[-b])
-            b=b+1
+            b = b + 1
         strands_flipped.append(strand_flipped)
         knot2.append(strand_flipped)
-        a=a+1
-    intersections_flipped=list()
-    a=0
+        a = a + 1
+    intersections_flipped = []
+    a = 0
     while a < len(strands_flipped):
-        strand_considered=strands_flipped[a]
-        b=0
+        strand_considered = strands_flipped[a]
+        b = 0
         while b < len(strand_considered):
-            intersection_considered=strand_considered[b]
-            if intersection_considered[1]==0 and intersection_considered[0] != intersection:
+            intersection_considered = strand_considered[b]
+            if intersection_considered[1] == 0 and intersection_considered[0] != intersection:
                 intersections_flipped.append(intersection_considered[0])
-            b=b+1
-        a=a+1
-    a=0
+            b = b + 1
+        a = a + 1
+    a = 0
     while a < len(knot2):
-        strand_considered=knot2[a]
-        b=0
+        strand_considered = knot2[a]
+        b = 0
         while b < len(strand_considered):
-            intersection_considered=strand_considered[b]
+            intersection_considered = strand_considered[b]
             if intersection_considered[0] in intersections_flipped:
-                if intersection_considered[1]==1:
-                    intersection_considered[1]=-1
-                elif intersection_considered[1]==-1:
-                    intersection_considered[1]=1
-            b=b+1
-        a=a+1
-    #a=0
-    #print(strands_flipped)
-    #while a < len(strands_flipped):
-    #    strand_considered=strands_flipped[a]
-    #    b=0
-    #    while b < len(strand_considered):
-    #        intersection_considered=strand_considered[b]
-    #        if intersection_considered[0] in intersections_flipped:
-    #            if intersection_considered[1]==1:
-    #                intersection_considered[1]=-1
-    #            elif intersection_considered[1]==-1:
-    #                intersection_considered[1]=1
-    #        b=b+1
-    #    a=a+1
+                if intersection_considered[1] == 1:
+                    intersection_considered[1] = -1
+                elif intersection_considered[1] == -1:
+                    intersection_considered[1] = 1
+            b = b + 1
+        a = a + 1
     return knot2, strands_flipped
 
 def split_intersection_A(knot_unperturbed,intersection):
@@ -141,8 +124,8 @@ def split_intersection_A(knot_unperturbed,intersection):
                         strandsplit1.append(strand_considered[0])
                         strandsplit2=strandsplit1[:]
                 remove=strand_considered
-            b=b+1
-        a=a+1
+            b+=1
+        a+=1
     knot.remove(remove)
     knot.append(strandsplit1)
     knot.append(strandsplit2)
@@ -160,29 +143,28 @@ def split_intersection_A(knot_unperturbed,intersection):
                     positive_orientation=False
             if intersection_considered[0]==intersection and intersection_considered[1]==-1:
                 strand_negative=strand_considered[:]
-            b=b+1
-        a=a+1
+            b+=1
+        a+=1
     if positive_orientation==True:
         if strand_positive == strandsplit1 and strand_negative != strandsplit2:
-            strandnew1=list()
-            strandnew2=list()
+            strandnew1=[]
+            strandnew2=[]
             strandnew1=strand_positive[1:(len(strand_positive)-1)]
             a=0
             while a <(len(strand_negative)-1):
                 strandnew2.append(strand_negative[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strandsplit2)):
                 strandnew2.append(strandsplit2[a])
-                a=a+1
+                a+=1
             knot.remove(strand_positive)
             knot.remove(strandsplit2)
             knot.remove(strand_negative)
             knot.append(strandnew1)
             knot.append(strandnew2)
         elif strand_positive ==strandsplit1 and strand_negative == strandsplit2:
-            strandnew1=list()
-            strandnew2=list()
+            strandnew1, strandnew2 = [], []
             strandnew1=strand_positive[1:(len(strand_positive)-1)]
             strandnew2=strand_negative[1:(len(strand_negative)-1)]
             knot.remove(strand_positive)
@@ -190,78 +172,78 @@ def split_intersection_A(knot_unperturbed,intersection):
             knot.append(strandnew1)
             knot.append(strandnew2)
         elif strand_positive != strandsplit1 and strand_negative == strandsplit2:
-            strandnew1=list()
-            strandnew2=list()
+            strandnew1=[]
+            strandnew2=[]
             strandnew1=strand_negative[1:(len(strand_negative)-1)]
             a=0
             while a <(len(strandsplit1)-1):
                 strandnew2.append(strandsplit1[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strand_positive)):
                 strandnew2.append(strand_positive[a])
-                a=a+1
+                a+=1
             knot.remove(strand_positive)
             knot.remove(strandsplit1)
             knot.remove(strand_negative)
             knot.append(strandnew1)
             knot.append(strandnew2)
         elif strand_positive == strand_negative:
-            strandnew1=list()
+            strandnew1=[]
             a=0
             while a < (len(strandsplit1)-1):
                 strandnew1.append(strandsplit1[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strand_positive)-1):
                 strandnew1.append(strand_positive[a])
-                a=a+1
+                a+=1
             a=1
             while a < len(strandsplit2):
                 strandnew1.append(strandsplit2[a])
-                a=a+1
+                a+=1
             knot.remove(strand_positive)
             knot.remove(strandsplit1)
             knot.remove(strandsplit2)
             knot.append(strandnew1)
         elif strandsplit1 == strandsplit2:
-            strandnew1=list()
+            strandnew1=[]
             a=0
             while a < (len(strand_negative)-1):
                 strandnew1.append(strand_negative[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strandsplit2)-1):
                 strandnew1.append(strandsplit2[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strand_positive)):
                 strandnew1.append(strand_positive[a])
-                a=a+1
+                a+=1
             knot.remove(strandsplit2)
             knot.remove(strandsplit1)
             knot.remove(strand_positive)
             knot.remove(strand_negative)
             knot.append(strandnew1)
         else:
-            strandnew1=list()
-            strandnew2=list()
+            strandnew1=[]
+            strandnew2=[]
             a=0
             while a < (len(strandsplit1)-1):
                 strandnew1.append(strandsplit1[a])
-                a=a+1
+                a+=1
             a=1
             while a < len(strand_positive):
                 strandnew1.append(strand_positive[a])
-                a=a+1
+                a+=1
             a=0
             while a < (len(strand_negative)-1):
                 strandnew2.append(strand_negative[a])
-                a=a+1
+                a+=1
             a=1
             while a < len(strandsplit2):
                 strandnew2.append(strandsplit2[a])
-                a=a+1
+                a+=1
             knot.remove(strandsplit1)
             knot.remove(strandsplit2)
             knot.remove(strand_positive)
@@ -270,104 +252,104 @@ def split_intersection_A(knot_unperturbed,intersection):
             knot.append(strandnew2)
     elif positive_orientation==False:
         if strandsplit1==strand_negative and strandsplit2==strand_positive:
-            strandnew1=list()
+            strandnew1=[]
             knot,strands_flipped=reverse_strands(knot, strandsplit2, intersection)
             strandsplit2=strands_flipped[0]
             a=1
             while a < (len(strandsplit2)-1):
                 strandnew1.append(strandsplit2[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strandsplit1)-1):
                 strandnew1.append(strandsplit1[a])
-                a=a+1
+                a+=1
             knot.remove(strandsplit2)
             knot.remove(strandsplit1)
             knot.append(strandnew1)
         elif strandsplit1 == strand_negative and strandsplit2 != strand_positive:
-            strandnew1=list()
+            strandnew1=[]
             knot,strands_flipped=reverse_strands(knot,strandsplit1,intersection)
             strandsplit1=strands_flipped[0]
             a=0
             while a < (len(strand_positive)-1):
                 strandnew1.append(strand_positive[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strandsplit1)-1):
                 strandnew1.append(strandsplit1[a])
-                a=a+1
+                a+=1
             a=1
             while a < len(strandsplit2):
                 strandnew1.append(strandsplit2[a])
-                a=a+1
+                a+=1
             knot.remove(strandsplit1)
             knot.remove(strandsplit2)
             knot.remove(strand_positive)
             knot.append(strandnew1)
         elif strandsplit1 != strand_negative and strandsplit2 == strand_positive:
-            strandnew1=list()
+            strandnew1=[]
             knot,strands_flipped=reverse_strands(knot,strandsplit2,intersection)
             strandsplit2=strands_flipped[0]
             a=0
             while a < (len(strandsplit1)-1):
                 strandnew1.append(strandsplit1[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strandsplit2)-1):
                 strandnew1.append(strandsplit2[a])
-                a=a+1
+                a+=1
             a=1
             while a < len(strand_negative):
                 strandnew1.append(strand_negative[a])
-                a=a+1
+                a+=1
             knot.remove(strandsplit2)
             knot.remove(strand_negative)
             knot.remove(strandsplit1)
             knot.append(strandnew1)
         elif strandsplit1==strandsplit2:
-            strandnew1=list()
+            strandnew1=[]
             knot,strands_flipped=reverse_strands(knot,strandsplit2,intersection)
             strandsplit2=strands_flipped[0]
             a=0
             while a < (len(strand_positive)-1):
                 strandnew1.append(strand_positive[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strandsplit2)-1):
                 strandnew1.append(strandsplit2[a])
-                a=a+1
+                a+=1
             a=1
             while a < len(strand_negative):
                 strandnew1.append(strand_negative[a])
-                a=a+1
+                a+=1
             knot.remove(strand_negative)
             knot.remove(strandsplit2)
             knot.remove(strandsplit1)
             knot.remove(strand_positive)
             knot.append(strandnew1)
         elif strand_positive==strand_negative:
-            strandnew1=list()
+            strandnew1=[]
             knot,strands_flipped=reverse_strands(knot,strand_negative,intersection)
             strand_negative=strands_flipped[0]
             a=0
             while a < (len(strandsplit1)-1):
                 strandnew1.append(strandsplit1[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strand_negative)-1):
                 strandnew1.append(strand_negative[a])
-                a=a+1
+                a+=1
             a=1
             while a < len(strandsplit2):
                 strandnew1.append(strandsplit2[a])
-                a=a+1
+                a+=1
             knot.remove(strand_negative)
             knot.remove(strandsplit1)
             knot.remove(strandsplit2)
             knot.append(strandnew1)
         else:
-            strandnew1=list()
-            strandnew2=list()
+            strandnew1=[]
+            strandnew2=[]
             knot,strands_flipped=reverse_strands(knot,strandsplit2,intersection)
             strandsplit2=strands_flipped[0]
             strand_considered=strands_flipped[-1]
@@ -377,37 +359,37 @@ def split_intersection_A(knot_unperturbed,intersection):
                 a=0
                 while a < (len(strand_positive)-1):
                     strandnew1.append(strand_positive[a])
-                    a=a+1
+                    a+=1
                 a=1
                 while a < len(strandsplit1):
                     strandnew1.append(strandsplit1[a])
-                    a=a+1
+                    a+=1
                 a=0
                 while a < (len(strandsplit2)-1):
                     strandnew2.append(strandsplit2[a])
-                    a=a+1
+                    a+=1
                 a=1
                 while a < len(strand_negative):
                     strandnew2.append(strand_negative[a])
-                    a=a+1
+                    a+=1
             elif intersection_considered[1]==1:
                 strand_positive=strand_considered
                 a=0
                 while a < (len(strandsplit1)-1):
                     strandnew1.append(strandsplit1[a])
-                    a=a+1
+                    a+=1
                 a=1
                 while a < len(strand_positive):
                     strandnew1.append(strand_positive[a])
-                    a=a+1
+                    a+=1
                 a=0
                 while a < (len(strandsplit2)-1):
                     strandnew2.append(strandsplit2[a])
-                    a=a+1
+                    a+=1
                 a=1
                 while a < len(strand_negative):
                     strandnew2.append(strand_negative[a])
-                    a=a+1
+                    a+=1
             knot.remove(strand_negative)
             knot.remove(strand_positive)
             knot.remove(strandsplit1)
@@ -438,8 +420,8 @@ def split_intersection_A_inverse(knot_unperturbed,intersection):
                         strandsplit1.append(strand_considered[0])
                         strandsplit2=strandsplit1[:]
                 remove=strand_considered
-            b=b+1
-        a=a+1
+            b+=1
+        a+=1
     knot3.remove(remove)
     knot3.append(strandsplit1)
     knot3.append(strandsplit2)
@@ -457,108 +439,108 @@ def split_intersection_A_inverse(knot_unperturbed,intersection):
                     positive_orientation=False
             if intersection_considered[0]==intersection and intersection_considered[1]==-1:
                 strand_negative=strand_considered[:]
-            b=b+1
-        a=a+1
+            b+=1
+        a+=1
     if positive_orientation==True:
         if strandsplit2 == strand_negative and strandsplit1 == strand_positive:
-            strandnew1=list()
+            strandnew1=[]
             knot3,strands_flipped=reverse_strands(knot3,strand_positive,intersection)
             strand_positive=strands_flipped[0]
             a=1
             while a < (len(strand_positive)-1):
                 strandnew1.append(strand_positive[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strandsplit2)-1):
                 strandnew1.append(strandsplit2[a])
-                a=a+1
+                a+=1
             knot3.remove(strand_positive)
             knot3.remove(strandsplit2)
             knot3.append(strandnew1)
         elif strandsplit2 == strand_negative and strandsplit1 != strand_positive:
-            strandnew1=list()
+            strandnew1=[]
             knot3,strands_flipped=reverse_strands(knot3,strandsplit2,intersection)
             strandsplit2=strands_flipped[0]
             a=0
             while a < (len(strandsplit1)-1):
                 strandnew1.append(strandsplit1[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strandsplit2)-1):
                 strandnew1.append(strandsplit2[a])
-                a=a+1
+                a+=1
             a=1
             while a < len(strand_positive):
                 strandnew1.append(strand_positive[a])
-                a=a+1
+                a+=1
             knot3.remove(strandsplit1)
             knot3.remove(strandsplit2)
             knot3.remove(strand_positive)
             knot3.append(strandnew1)
         elif strandsplit2 != strand_negative and strandsplit1 == strand_positive:
-            strandnew1=list()
+            strandnew1=[]
             knot3,strands_flipped=reverse_strands(knot3,strand_positive,intersection)
             strand_positive=strands_flipped[0]
             a=0
             while a < (len(strand_negative)-1):
                 strandnew1.append(strand_negative[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strand_positive)-1):
                 strandnew1.append(strand_positive[a])
-                a=a+1
+                a+=1
             a=1
             while a < len(strandsplit2):
                 strandnew1.append(strandsplit2[a])
-                a=a+1
+                a+=1
             knot3.remove(strandsplit2)
             knot3.remove(strand_negative)
             knot3.remove(strand_positive)
             knot3.append(strandnew1)
         elif strandsplit1 == strandsplit2:
-            strandnew1=list()
+            strandnew1=[]
             knot3,strands_flipped=reverse_strands(knot3,strandsplit2,intersection)
             strandsplit2=strands_flipped[0]
             a=0
             while a < (len(strand_negative)-1):
                 strandnew1.append(strand_negative[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strandsplit2)-1):
                 strandnew1.append(strandsplit2[a])
-                a=a+1
+                a+=1
             a=1
             while a < len(strand_positive):
                 strandnew1.append(strand_positive[a])
-                a=a+1
+                a+=1
             knot3.remove(strand_positive)
             knot3.remove(strandsplit2)
             knot3.remove(strandsplit1)
             knot3.remove(strand_negative)
             knot3.append(strandnew1)
         elif strand_positive==strand_negative:
-            strandnew1=list()
+            strandnew1=[]
             knot3,strands_flipped=reverse_strands(knot3,strand_positive,intersection)
             strand_positive=strands_flipped[0]
             a=0
             while a < (len(strandsplit1)-1):
                 strandnew1.append(strandsplit1[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strand_positive)-1):
                 strandnew1.append(strand_positive[a])
-                a=a+1
+                a+=1
             a=1
             while a < len(strandsplit2):
                 strandnew1.append(strandsplit2[a])
-                a=a+1
+                a+=1
             knot3.remove(strand_positive)
             knot3.remove(strandsplit1)
             knot3.remove(strandsplit2)
             knot3.append(strandnew1)
         else:
-            strandnew1=list()
-            strandnew2=list()
+            strandnew1=[]
+            strandnew2=[]
             knot3,strands_flipped=reverse_strands(knot3,strand_positive,intersection)
             strand_positive=strands_flipped[0]
             strand_considered=strands_flipped[-1]
@@ -568,37 +550,37 @@ def split_intersection_A_inverse(knot_unperturbed,intersection):
                 a=0
                 while a < (len(strand_negative)-1):
                     strandnew1.append(strand_negative[a])
-                    a=a+1
+                    a+=1
                 a=1
                 while a < len(strandsplit1):
                     strandnew1.append(strandsplit1[a])
-                    a=a+1
+                    a+=1
                 a=0
                 while a < (len(strand_positive)-1):
                     strandnew2.append(strand_positive[a])
-                    a=a+1
+                    a+=1
                 a=1
                 while a < len(strandsplit2):
                     strandnew2.append(strandsplit2[a])
-                    a=a+1
+                    a+=1
             elif intersection_considered[1]==-1:
                 strand_negative=strand_considered
                 a=0
                 while a < (len(strand_positive)-1):
                     strandnew1.append(strand_positive[a])
-                    a=a+1
+                    a+=1
                 a=1
                 while a < len(strandsplit2):
                     strandnew1.append(strandsplit2[a])
-                    a=a+1
+                    a+=1
                 a=0
                 while a < (len(strandsplit1)-1):
                     strandnew2.append(strandsplit1[a])
-                    a=a+1
+                    a+=1
                 a=1
                 while a < len(strand_negative):
                     strandnew2.append(strand_negative[a])
-                    a=a+1
+                    a+=1
             knot3.remove(strand_positive)
             knot3.remove(strand_negative)
             knot3.remove(strandsplit1)
@@ -607,116 +589,116 @@ def split_intersection_A_inverse(knot_unperturbed,intersection):
             knot3.append(strandnew2)
     elif positive_orientation==False:
         if strand_positive == strandsplit2 and strand_negative == strandsplit1:
-            strandnew1=list()
-            strandnew2=list()
+            strandnew1=[]
+            strandnew2=[]
             a=1
             while a < (len(strand_positive)-1):
                 strandnew1.append(strand_positive[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strand_negative)-1):
                 strandnew2.append(strand_negative[a])
-                a=a+1
+                a+=1
             knot3.remove(strand_positive)
             knot3.remove(strand_negative)
             knot3.append(strandnew1)
             knot3.append(strandnew2)
         elif strand_positive == strandsplit2 and strand_negative != strandsplit1:
-            strandnew1=list()
-            strandnew2=list()
+            strandnew1=[]
+            strandnew2=[]
             a=1
             while a < (len(strand_positive)-1):
                 strandnew1.append(strand_positive[a])
-                a=a+1
+                a+=1
             a=0
             while a < (len(strandsplit1)-1):
                 strandnew2.append(strandsplit1[a])
-                a=a+1
+                a+=1
             a=1
             while a < len(strand_negative):
                 strandnew2.append(strand_negative[a])
-                a=a+1
+                a+=1
             knot3.remove(strand_positive)
             knot3.remove(strandsplit1)
             knot3.remove(strand_negative)
             knot3.append(strandnew1)
             knot3.append(strandnew2)
         elif strand_positive != strandsplit2 and strand_negative == strandsplit1:
-            strandnew1=list()
-            strandnew2=list()
+            strandnew1=[]
+            strandnew2=[]
             a=1
             while a < (len(strand_negative)-1):
                 strandnew1.append(strand_negative[a])
-                a=a+1
+                a+=1
             a=0
             while a < (len(strand_positive)-1):
                 strandnew2.append(strand_positive[a])
-                a=a+1
+                a+=1
             a=1
             while a < len(strandsplit2):
                 strandnew2.append(strandsplit2[a])
-                a=a+1
+                a+=1
             knot3.remove(strand_positive)
             knot3.remove(strandsplit2)
             knot3.remove(strand_negative)
             knot3.append(strandnew1)
             knot3.append(strandnew2)
         elif strandsplit1 == strandsplit2:
-            strandnew1=list()
+            strandnew1=[]
             a=0
             while a < (len(strand_positive)-1):
                 strandnew1.append(strand_positive[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strandsplit2)-1):
                 strandnew1.append(strandsplit2[a])
-                a=a+1
+                a+=1
             a=1
             while a < len(strand_negative):
                 strandnew1.append(strand_negative[a])
-                a=a+1
+                a+=1
             knot3.remove(strand_positive)
             knot3.remove(strand_negative)
             knot3.remove(strandsplit2)
             knot3.remove(strandsplit1)
             knot3.append(strandnew1)
         elif strand_positive == strand_negative:
-            strandnew1=list()
+            strandnew1=[]
             a=0
             while a < (len(strandsplit1)-1):
                 strandnew1.append(strandsplit1[a])
-                a=a+1
+                a+=1
             a=1
             while a < (len(strand_positive)-1):
                 strandnew1.append(strand_positive[a])
-                a=a+1
+                a+=1
             a=1
             while a < len(strandsplit2):
                 strandnew1.append(strandsplit2[a])
-                a=a+1
+                a+=1
             knot3.remove(strandsplit1)
             knot3.remove(strandsplit2)
             knot3.remove(strand_positive)
             knot3.append(strandnew1)
         else:
-            strandnew1=list()
-            strandnew2=list()
+            strandnew1=[]
+            strandnew2=[]
             a=0
             while a < (len(strand_positive)-1):
                 strandnew1.append(strand_positive[a])
-                a=a+1
+                a+=1
             a=1
             while a < len(strandsplit2):
                 strandnew1.append(strandsplit2[a])
-                a=a+1
+                a+=1
             a=0
             while a < (len(strandsplit1)-1):
                 strandnew2.append(strandsplit1[a])
-                a=a+1
+                a+=1
             a=1
             while a < len(strand_negative):
                 strandnew2.append(strand_negative[a])
-                a=a+1
+                a+=1
             knot3.remove(strand_positive)
             knot3.remove(strand_negative)
             knot3.remove(strandsplit1)
@@ -726,7 +708,7 @@ def split_intersection_A_inverse(knot_unperturbed,intersection):
     return knot3
 
 def compile_bracket(bracket):
-    compiled_bracket=list()
+    compiled_bracket=[]
     for i in range(2,len(bracket),3):
         sign=bracket[i-2]
         exponent=bracket[i-1]
@@ -736,7 +718,7 @@ def compile_bracket(bracket):
     return(compiled_bracket)
 
 def compile_coefficients(bracket):
-    polynomial=list()
+    polynomial=[]
     a=0
     while a < len(bracket):
         bracket_considered=bracket[a]    
@@ -752,9 +734,9 @@ def compile_coefficients(bracket):
                 elif holder1=='-':
                     collected_considered[0]=collected_considered[0]-1
                 added=True
-                b=b+1
+                b+=1
             else:
-                b=b+1
+                b+=1
         if b==len(polynomial) and added==False:
             holder1=bracket_considered[0]
             holder2=bracket_considered[1]
@@ -764,7 +746,7 @@ def compile_coefficients(bracket):
                 holder3=-1
             holder4=list([holder3,holder2])
             polynomial.append(holder4)
-        a=a+1
+        a+=1
     a=0
     n = len(polynomial)
     while a < n:
@@ -773,11 +755,11 @@ def compile_coefficients(bracket):
             polynomial.remove(exponent_considered)
             n=len(polynomial)
         else:
-            a=a+1
+            a+=1
     return polynomial
 
 def writhe_number(knot_unperturbed):
-    w=0
+    writhe_number=0
     intersections=check_intersections(knot_unperturbed)
     for i in range(len(intersections)):
         a=0
@@ -786,11 +768,11 @@ def writhe_number(knot_unperturbed):
             intersection_considered=strand_considered[-1]
             if intersection_considered[0]==intersections[i]:
                 if intersection_considered[1]==-1:
-                    w=w+1
+                    writhe_number += 1
                 if intersection_considered[1]==1:
-                    w=w-1
-            a=a+1
-    return w
+                    writhe_number -= 1
+            a += 1
+    return writhe_number
 
 def bracket_polynomial_no_removal(knot_unperturbed):
     bracket=list(['+',0,knot_unperturbed])
@@ -798,7 +780,7 @@ def bracket_polynomial_no_removal(knot_unperturbed):
     length_intersections=len(intersections)
     while length_intersections>0:
         intersection=intersections[0]
-        new_bracket=list()
+        new_bracket=[]
         for i in range(2,len(bracket),3):
             exponent=bracket[i-1]
             knot=bracket[i]
@@ -837,7 +819,7 @@ def remove_knots(bracket_unperturbed):
             bracket.insert(a,new_bracket_1)
             bracket.insert(a+1,new_bracket_2)
         else:
-            a=a+1
+            a+=1
     return bracket
 
 def X (knot_unperturbed,bracket):
@@ -861,8 +843,8 @@ def convert_to_jones(bracket_unperturbed):
         bracket_considered[1]=-bracket_considered[1]/4
     return bracket
 
-def complete_polynomial_bracket ():
-    knot_unperturbed=collect_parametrized_knot()
+def complete_polynomial_bracket(knot_information):
+    knot_unperturbed=collect_parametrized_knot(knot_information)
     bracket=copy.deepcopy(knot_unperturbed)
     bracket=bracket_polynomial_no_removal(bracket)
     bracket=remove_knots(bracket)
@@ -871,15 +853,15 @@ def complete_polynomial_bracket ():
     bracket=convert_to_jones(bracket)
     return bracket
 
-jones_polynomial=complete_polynomial_bracket()
-print("\033[1;37;48m \n \n \n")
-print('jones polynomial is', jones_polynomial)
-print('\n' + '\n)
+# jones_polynomial=complete_polynomial_bracket(knot_information=[])
+# # print("\033[1;37;48m \n \n \n")
+# print('jones polynomial is', jones_polynomial)
+# print('\n' + '\n')
 
-#knot_test=list([[[1,1],[2,0],[3,-1]],[[2,1],[3,0],[1,-1]],[[3,1],[1,0],[2,-1]]])
-#jonespolynomial=complete_polynomial_bracket(knot_test)
-#print(jonespolynomial)
+knot_test=[[[1,1],[2,0],[3,-1]],[[2,1],[3,0],[1,-1]],[[3,1],[1,0],[2,-1]]]
+jonespolynomial=complete_polynomial_bracket(knot_test)
+print(jonespolynomial)
 
-#knot_test_2=list([[[1,-1],[2,0],[3,1]],[[2,-1],[3,0],[1,1]],[[3,-1],[1,0],[2,1]]])
-#jonespolynomial2=complete_polynomial_bracket(knot_test_2)
-#print(jonespolynomial2)
+# knot_test_2=list([[[1,-1],[2,0],[3,1]],[[2,-1],[3,0],[1,1]],[[3,-1],[1,0],[2,1]]])
+# jonespolynomial2=complete_polynomial_bracket(knot_test_2)
+# print(jonespolynomial2)
