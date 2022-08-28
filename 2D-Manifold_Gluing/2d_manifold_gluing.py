@@ -1,6 +1,6 @@
 class Surface: 
-    def __init__(self) -> None:
-        self.relationships, self.check_edges, self.edges = generate_polygon_vertices()
+    def __init__(self, glueing: str) -> None:
+        self.relationships, self.check_edges, self.edges = generate_polygon_vertices(glueing)
         self.boundaries = determine_boundary_edges(self.check_edges, self.edges)
         self.vertices, self.edges_split = determine_vertices(self.relationships, self.boundaries)
         self.number_of_edges = determine_number_of_edges(self.edges, self.boundaries)
@@ -10,8 +10,8 @@ class Surface:
         self.genus = determine_genus(self.euler_characteristic, self.orientable, self.compacted_boundaries)
         
     
-def generate_polygon_vertices() -> tuple[dict, list, list[str]]:
-    gluing=input("please input gluing here: ")
+def generate_polygon_vertices(gluing:str) -> tuple[dict, list, list[str]]:
+    
     edges=gluing.split(',')
     check_edges=[]
     a=0
@@ -287,7 +287,8 @@ def determine_genus(Euler, orientable, compacted_boundaries):
 
 def main(): 
     
-    surface = Surface()
+    gluing = input("please input gluing here: ")
+    surface = Surface(glueing=gluing)
    
     """RESULTS"""
     print(f'The Euler characteristic is {str(surface.euler_characteristic)}')
