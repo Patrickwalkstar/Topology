@@ -116,7 +116,7 @@ def generate_polygon_vertices(gluing:str) -> tuple[dict, list, list[str]]:
     return relationships, check_edges, edges #relationships,check_edges,edges are the three values we need to know
 
 
-def determine_boundary_edges(check_edges, edges):
+def determine_boundary_edges(check_edges: list, edges: list[str]):
     boundaries = [] #this list is going to hold all of the edge identities that represent boundary edges
 
     for item in check_edges: #pick an item in our list of edge identities (check_edges)
@@ -262,19 +262,19 @@ def determine_compacted_boundaries(edges, boundaries):
         print(index)
         if index == 0:
             if edges[-1] in boundaries:
-                compacted_boundaries = compacted_boundaries - .5
+                compacted_boundaries -= .5
             if edges[1] in boundaries:
-                compacted_boundaries = compacted_boundaries - .5
+                compacted_boundaries -= .5
         elif index == len(edges) - 1:
             if edges[0] in boundaries:
-                compacted_boundaries = compacted_boundaries - .5
+                compacted_boundaries -= .5
             if edges[-2] in boundaries:
-                compacted_boundaries = compacted_boundaries - .5
+                compacted_boundaries -= .5
         else:
             if edges[index - 1] in boundaries:
-                compacted_boundaries = compacted_boundaries - .5
+                compacted_boundaries -= .5
             if edges[index + 1] in boundaries:
-                compacted_boundaries = compacted_boundaries - .5
+                compacted_boundaries -= .5
     if len(boundaries) != 0 and compacted_boundaries == 0:
         compacted_boundaries = 1
     return compacted_boundaries
