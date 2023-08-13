@@ -1,5 +1,10 @@
 class Surface: 
     def __init__(self, glueing: str) -> None:
+        """Initializes the Surface class.
+        Args:
+            glueing (str): The gluing of the 2D manifold. The gluing is a string of the form
+            "A1,B1,C1,D1,A2,B2,C2,D2" where A1 and A2 are the same edge, B1 and B2 are the same edge, etc.
+        """
         self.relationships, self.check_edges, self.edges = generate_polygon_vertices(glueing)
         self.boundaries = determine_boundary_edges(self.check_edges, self.edges)
         self.vertices, self.edges_split = determine_vertices(self.relationships, self.boundaries)
@@ -131,7 +136,7 @@ def determine_boundary_edges(check_edges: list, edges: list[str]):
     return boundaries #we then return boundaries for later use
 
 
-def determine_vertices(relationships, boundaries):
+def determine_vertices(relationships: list, boundaries: list) -> list:
     # for this function, we have two arbitrary points for each line, a 'lower' connection and 'upper' connection which represent the
     #vertices of the polygon. we also have all of these points found as keys in our relationships dictionary, so we can quickly grab
     #them all by just using the .keys() function already present in python to grab the keys, and convert them to a list for ease
@@ -225,20 +230,20 @@ def determine_vertices(relationships, boundaries):
     return vertices, edges_split
 
 
-def determine_number_of_edges(edges, boundaries):
+def determine_number_of_edges(edges: int, boundaries: int) -> int:
     #are actually the same edge as the edge it glues to, so the total number of edges is equal to the number of edges that have gluing partners,
     #dividied by 2. this number is found by subtracting the number of boundaries from the number of edges, and dividing by 2. But, the boundaries
     #are also edges, so we have to add them back in
     return ((len(edges) - len(boundaries)) / 2) + len(boundaries)
 
 
-def euler_characteristic(vertices, number_of_edges):
+def euler_characteristic(vertices: int, number_of_edges: int) -> int:
     #we already calculated the number of edges, and because we have a single polygon, we have one face. thus, we also use the len of the vertices
     #list we calculated earlier to get the number of vertices. Thus, the Euler characteristic is determined
     return len(vertices) - number_of_edges + 1
 
 
-def determine_orientability(edges, check_edges, boundaries):
+def determine_orientability(edges: list, check_edges: dict, boundaries: list):
     orientable = True # we assume orientability is true, until we find a condition which makes the surface not orientable
     e = 0
     while e < len(check_edges):#we have to check each edge pairing in the system to determine if a mobius strip exists
@@ -253,13 +258,10 @@ def determine_orientability(edges, check_edges, boundaries):
     return orientable #return orientability to display, and also use in calculating genus
 
 
-def determine_compacted_boundaries(edges, boundaries):
+def determine_compacted_boundaries(edges: list, boundaries: list) -> float:
     compacted_boundaries = len(boundaries)
     for item in boundaries:
-        print('compacted_boundaries')
-        print(compacted_boundaries)
         index = edges.index(item)
-        print(index)
         if index == 0:
             if edges[-1] in boundaries:
                 compacted_boundaries -= .5
